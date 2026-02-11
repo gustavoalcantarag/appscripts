@@ -2,10 +2,13 @@ function correoToHtml() {
   var sheetHora = SpreadsheetApp.openById('10Vt7Yr9xssqWpwLoGvJS4FJeMzz-LeahT1jP-h5QhsE').getSheetByName('Hora');
   var sheetHtml = SpreadsheetApp.openById('10Vt7Yr9xssqWpwLoGvJS4FJeMzz-LeahT1jP-h5QhsE').getSheetByName('Html');
   var ultimaFecha = sheetHora.getRange('A2').getValue();
+  var ultimoId = sheetHora.getRange('B2').getValue();
   if (!ultimaFecha) ultimaFecha = new Date(0);
+  if (!ultimoId) ultimoId = '';
 
   var threads = GmailApp.search('is:unread');
   var nuevaFecha = new Date(ultimaFecha);
+  var nuevoId = ultimoId;
 
   var registros = [];
 
@@ -15,7 +18,12 @@ function correoToHtml() {
       var mensaje = mensajes[j];
       if (!mensaje.isUnread()) continue;
       var fechaCorreo = mensaje.getDate();
-      if (fechaCorreo > ultimaFecha) {
+      var idCorreo = mensaje.getId();
+      // Procesar si la fecha es mayor o si es igual pero el ID es mayor
+      if (
+        fechaCorreo > ultimaFecha ||
+        (fechaCorreo.getTime() === new Date(ultimaFecha).getTime() && idCorreo > ultimoId)
+      ) {
         var fechaHora = Utilities.formatDate(fechaCorreo, Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss');
         var asunto = mensaje.getSubject();
         var remitente = mensaje.getFrom();
@@ -23,8 +31,13 @@ function correoToHtml() {
         var cc = mensaje.getCc();
         var htmlBody = mensaje.getBody();
         registros.push([fechaHora, asunto, remitente, destinatario, cc, htmlBody]);
-        if (fechaCorreo > nuevaFecha) {
+        // Actualizar nuevaFecha y nuevoId si es el más reciente
+        if (
+          fechaCorreo > nuevaFecha ||
+          (fechaCorreo.getTime() === nuevaFecha.getTime() && idCorreo > nuevoId)
+        ) {
           nuevaFecha = fechaCorreo;
+          nuevoId = idCorreo;
         }
       }
     }
@@ -34,8 +47,8 @@ function correoToHtml() {
   if (registros.length > 0) {
     var ultimaFila = sheetHtml.getLastRow();
     sheetHtml.getRange(ultimaFila + 1, 1, registros.length, 6).setValues(registros);
+    // Actualizar la celda A2 y B2 de la hoja 'Hora' con la fecha e ID más reciente procesado
+    sheetHora.getRange('A2').setValue(nuevaFecha);
+    sheetHora.getRange('B2').setValue(nuevoId);
   }
-
-  // Actualizar la celda A2 de la hoja 'Hora' con la fecha más reciente procesada
-  sheetHora.getRange('A2').setValue(nuevaFecha);
 }
