@@ -2,10 +2,25 @@ function enviarCorreosDesdeSheet() {
   var ss = SpreadsheetApp.openById('10Vt7Yr9xssqWpwLoGvJS4FJeMzz-LeahT1jP-h5QhsE');
   var sheet = ss.getSheetByName('Html');
   var datos = sheet.getDataRange().getValues();
+  // Leer la fecha/hora de la celda A2 de la hoja Hora
+  var sheetHora = ss.getSheetByName('Hora');
+  var fechaHoraLimite = sheetHora.getRange('A2').getValue();
 
   // 1. Eliminar filas con 'Enviado' en la columna G (desde la segunda fila)
+  //    o cuya fecha en columna A (Html) sea menor que la fecha/hora de la hoja Hora (A2)
   for (var i = datos.length - 1; i >= 1; i--) {
-    if (datos[i][6] && datos[i][6].toString().trim().toLowerCase() === 'enviado') {
+    var estado = datos[i][6]; // Columna G
+    var fechaHtml = datos[i][0]; // Columna A
+    var eliminarPorEstado = estado && estado.toString().trim().toLowerCase() === 'enviado';
+    var eliminarPorFecha = false;
+    // Validar si fechaHtml es menor que fechaHoraLimite
+    if (fechaHtml && fechaHoraLimite) {
+      // Convertir a Date si es necesario
+      var fechaHtmlDate = (fechaHtml instanceof Date) ? fechaHtml : new Date(fechaHtml);
+      var fechaHoraLimiteDate = (fechaHoraLimite instanceof Date) ? fechaHoraLimite : new Date(fechaHoraLimite);
+      eliminarPorFecha = fechaHtmlDate < fechaHoraLimiteDate;
+    }
+    if (eliminarPorEstado || eliminarPorFecha) {
       sheet.deleteRow(i + 1);
     }
   }
