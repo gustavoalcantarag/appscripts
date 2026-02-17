@@ -11,16 +11,14 @@ function reenviarCorreos() {
     var remitente = data[i][4];
     var destinatario = data[i][5];
     var ccOriginal = data[i][6];
-    var bccOriginal = data[i][7];
 
     MailApp.sendEmail({
       to: 'gusnaty76@gmail.com',
-      subject: '[Reenvío] ' + asunto,
+      subject: asunto,
       htmlBody:
-        '<b>Remitente original:</b> ' + remitente + '<br>' +
-        '<b>Destinatario original:</b> ' + destinatario + '<br>' +
-        '<b>CC original:</b> ' + ccOriginal + '<br>' +
-        '<b>BCC original:</b> ' + bccOriginal + '<br><br>' +
+        '<b>De:</b> ' + remitente + '<br>' +
+        '<b>Para:</b> ' + destinatario + '<br>' +
+        '<b>Cc:</b> ' + ccOriginal + '<br>' +
         html
     });
     filasAEliminar.push(i+1); // Guarda el número de fila para eliminar
