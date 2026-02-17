@@ -16,11 +16,10 @@ function registrarCorreosNoLeidos() {
       var remitente = message.getFrom();
       var destinatario = message.getTo();
       var cc = message.getCc();
-      var bcc = message.getBcc();
 
       // Solo procesar si la fecha es posterior a la guardada
       if (fecha > nuevaFecha) {
-        sheetCorreos.appendRow([id, fecha, asunto, html, remitente, destinatario, cc, bcc]);
+        sheetCorreos.appendRow([id, fecha, asunto, html, remitente, destinatario, cc]);
         nuevaFecha = fecha;
       }
     });
