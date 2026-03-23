@@ -12,14 +12,22 @@ function reenviarCorreos() {
     var destinatario = data[i][5];
     var ccOriginal = data[i][6];
 
+    var MAX_BODY = 190000; // margen seguro bajo el límite de 200 KB de Gmail
+    if (html && html.length > MAX_BODY) {
+      html = html.substring(0, MAX_BODY) + '<br><br><i>[Contenido truncado: el correo original superaba el límite de tamaño permitido]</i>';
+    }
+
+    var cuerpo = '<b>De:</b> ' + remitente + '<br>' +
+      '<b>Para:</b> ' + destinatario + '<br>' +
+      '<b>Cc:</b> ' + ccOriginal + '<br>' +
+      html;
+
+    Logger.log('Fila ' + (i+1) + ' | ID: ' + id + ' | Asunto: ' + asunto + ' | Tamaño del cuerpo: ' + cuerpo.length + ' caracteres');
+
     MailApp.sendEmail({
       to: 'gusnaty76@gmail.com',
       subject: asunto,
-      htmlBody:
-        '<b>De:</b> ' + remitente + '<br>' +
-        '<b>Para:</b> ' + destinatario + '<br>' +
-        '<b>Cc:</b> ' + ccOriginal + '<br>' +
-        html
+      htmlBody: cuerpo
     });
     filasAEliminar.push(i+1); // Guarda el número de fila para eliminar
   }
